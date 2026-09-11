@@ -7,6 +7,12 @@ import { Button } from '../components/ui/Button';
 import toast from 'react-hot-toast';
 import type { AxiosError } from 'axios';
 import type { ApiError } from '../types';
+import { IS_DEMO, DEMO_ACCOUNT, DEMO_STORAGE_KEY } from '../api/demo';
+
+function resetDemoData() {
+  localStorage.removeItem(DEMO_STORAGE_KEY);
+  toast.success('Demo data reset');
+}
 
 export function LoginPage() {
   const [form, setForm] = useState({ email: '', password: '' });
@@ -83,6 +89,26 @@ export function LoginPage() {
             </Link>
           </p>
         </div>
+
+        {IS_DEMO && (
+          <div className="mt-4 bg-indigo-500/10 border border-indigo-500/30 rounded-2xl p-5 text-sm">
+            <p className="font-medium text-indigo-300">Live demo</p>
+            <p className="text-slate-400 mt-1">
+              No backend here — the API is simulated and your changes are saved in this browser only.
+            </p>
+            <p className="font-mono text-xs text-slate-300 mt-3">
+              {DEMO_ACCOUNT.email} · {DEMO_ACCOUNT.password}
+            </p>
+            <div className="flex gap-2 mt-3">
+              <Button type="button" size="sm" onClick={() => setForm({ ...DEMO_ACCOUNT })}>
+                Use demo account
+              </Button>
+              <Button type="button" size="sm" variant="ghost" onClick={resetDemoData}>
+                Reset demo data
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

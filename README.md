@@ -4,6 +4,24 @@ A full-stack project management app inspired by Trello. Organize work into proje
 
 **Stack:** FastAPI · PostgreSQL · React 19 · TypeScript · Vite · Tailwind CSS
 
+**🚀 Live demo:** **https://dlegendz.github.io/TrelloLite/** — sign in with `demo@trellolite.dev` / `Demo1234`
+
+> The live demo runs entirely in your browser: the FastAPI backend is replaced by a simulated API, and your changes are stored in `localStorage`. See [Deploying the demo to GitHub Pages](#deploying-the-demo-to-github-pages).
+
+![Kanban board](docs/screenshots/kanban-board.png)
+
+---
+
+## Screenshots
+
+| Dashboard | Projects |
+|-----------|----------|
+| ![Dashboard](docs/screenshots/dashboard.png) | ![Projects](docs/screenshots/projects.png) |
+| **Task editor** | **My Tasks** |
+| ![Task editor](docs/screenshots/task-modal.png) | ![My Tasks](docs/screenshots/my-tasks.png) |
+| **Admin – Manage Users** | **Login** |
+| ![Admin panel](docs/screenshots/admin-users.png) | ![Login](docs/screenshots/login.png) |
+
 ---
 
 ## Features
@@ -219,7 +237,9 @@ trello-lite/
 | Command | Description |
 |---------|-------------|
 | `npm run dev` | Start Vite dev server |
+| `npm run dev:demo` | Start dev server in demo mode (mock API, no backend needed) |
 | `npm run build` | Type-check and build for production |
+| `npm run build:demo` | Build the GitHub Pages demo into `frontend/dist` |
 | `npm run preview` | Preview the production build locally |
 | `npm run lint` | Run ESLint |
 
@@ -276,3 +296,24 @@ pytest --cov=app --cov-report=term-missing
 ```
 
 The test suite requires an 80% minimum code coverage.
+
+---
+
+## Deploying the demo to GitHub Pages
+
+GitHub Pages only hosts static files, so it cannot run the FastAPI backend or PostgreSQL. Instead, the frontend has a **demo mode**:
+
+- `npm run build:demo` builds with `--mode demo`, which loads `frontend/.env.demo` (`VITE_DEMO=true`) and sets the base path to `/TrelloLite/`.
+- In demo mode, `src/api/client.ts` routes every request to `src/api/demoAdapter.ts` — an in-browser mock that mirrors the backend's routes, permission rules and error format, seeded with sample users, projects and tasks, and persisted in `localStorage`.
+- The normal `npm run build` is unchanged and does not include the mock.
+
+Deployment is automated by [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml), which builds the demo and publishes it on every push to `main`.
+
+**One-time setup:** in the GitHub repository go to **Settings → Pages → Build and deployment → Source** and select **GitHub Actions**.
+
+To try the demo locally:
+
+```bash
+cd frontend
+npm run dev:demo
+```

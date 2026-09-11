@@ -1,10 +1,16 @@
 import axios from 'axios';
+import { IS_DEMO } from './demo';
 
 const BASE_URL = (import.meta.env.VITE_API_URL ?? 'http://localhost:8000') + '/api/v1';
+const LOGIN_URL = `${import.meta.env.BASE_URL}login`;
 
+// Demo build (GitHub Pages): serve every request from an in-browser mock API
 export const apiClient = axios.create({
   baseURL: BASE_URL,
   headers: { 'Content-Type': 'application/json' },
+  ...(IS_DEMO && {
+    adapter: async (config) => (await import('./demoAdapter')).demoAdapter(config),
+  }),
 });
 
 // Attach access token to every request
@@ -25,7 +31,7 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401 && !original._retry && !isAuthEndpoint) {
       original._retry = true;
       const refreshToken = localStorage.getItem('refresh_token');
-      if (refreshToken) {
+      if (refreshToken && !IS_DEMO) {
         try {
           const { data } = await axios.post(`${BASE_URL}/auth/refresh`, {
             refresh_token: refreshToken,
@@ -36,11 +42,12 @@ apiClient.interceptors.response.use(
         } catch {
           localStorage.removeItem('access_token');
           localStorage.removeItem('refresh_token');
-          window.location.href = '/login';
+          window.location.href = LOGIN_URL;
         }
       } else {
         localStorage.removeItem('access_token');
-        window.location.href = '/login';
+        localStorage.removeItem('refresh_token');
+        window.location.href = LOGIN_URL;
       }
     }
     return Promise.reject(error);
